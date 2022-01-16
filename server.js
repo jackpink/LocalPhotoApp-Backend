@@ -35,9 +35,7 @@ const getAlbums = () => {
 
 const getResponse = () => {
     const albums = getAlbums();
-    const response = {
-        albums: albums
-    };
+    const response = albums
     return response;
 }
 
@@ -56,7 +54,7 @@ app.get('/albums', async function (req, res) {
    console.log("Got a GET request for local albums");
    const response = getResponse();
    console.log('albums', response);
-   res.send(response);
+   setTimeout(() =>  {res.send(response)}, 1000);
 })
 
 // This responds a POST request for the homepage
