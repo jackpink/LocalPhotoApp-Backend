@@ -1,17 +1,21 @@
 const graphql = require('graphql');
 const crud = require('./crud');
+const path = require('path');
+const fs = require('fs');
+const upload = require('apollo-upload-server');
 
-const { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLSchema, GraphQLList } = graphql;
+const { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLBoolean, GraphQLSchema, GraphQLList } = graphql;
+
+const { GraphQLUpload } = upload;
 
 const AlbumType = new GraphQLObjectType({
     name: 'Album',
     fields: () => ({
-        id: {type:GraphQLID},
         name: {type:GraphQLString},
         photos: {
             type: new GraphQLList(PhotoType),
             resolve(parent, args) {
-                // Get photos for book
+                // Get photos for album
             }
         }
     })
@@ -48,6 +52,47 @@ const RootQuery = new GraphQLObjectType({
     }
 })
 
+const Mutation = new GraphQLObjectType({
+    name: 'Mutation',
+    fields: {
+        addAlbum: {
+            type: AlbumType,
+            args: {
+                name: {type: GraphQLString}
+            },
+            resolve(parent, args) {
+                console.log("to ad");
+                return crud.addAlbum(args.name);
+            }
+        },
+        uploadImage: {
+            type: AlbumType,
+            args: {
+                image: {type: GraphQLUpload},
+                //album: {type: GraphQLString}
+            },
+            async resolve(parent, { image }) {
+                const {filename, mimetype, createReadStream } = await image
+                console.log(image);
+                
+                const stream = createReadStream();
+                const pathName = path.join(__dirname, `/uploads/${filename}`)
+                console.log("creating file in path", pathName);
+                console.log("album name is ", createReadStream);
+                stream.on('open', async () => {
+                    await stream.pipe(fs.createWriteStream(pathName));
+                })
+                
+                
+                return {
+                    name: `${filename}`
+                }
+            }   
+        }
+    }
+})
+
 module.exports = new GraphQLSchema({
-    query: RootQuery
+    query: RootQuery,
+    mutation: Mutation
 });

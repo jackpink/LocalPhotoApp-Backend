@@ -1,6 +1,18 @@
 const { response } = require('express');
 var fs = require('fs');
 var _ = require("lodash");
+const multer = require('multer');
+
+const fileStorageEngine = multer.diskStorage({
+   destination: (req, file, cb) => {
+      cb(null, './uploads')
+   },
+   filename: (req, file, cb) => {
+      cb(null, Datenow() + "--" + file.originalname);
+   }
+});
+
+const upload = multer({storage: fileStorageEngine})
 
 
 const getAlbums = () => {
@@ -26,9 +38,8 @@ const getAlbums = () => {
  const getResponse = () => {
     const albums = getAlbums();
     let response = {albums: []};
-    albums.map((album, index) => {
+    albums.map((album) => {
       const albumJSON = {
-         id: index,
          name: album
       };
       response.albums.push(albumJSON);
@@ -48,7 +59,8 @@ const getAlbumById = (idQuery) => {
 
 const writeToFile = (albums) => {
    try {
-      fs.writeFileSync('albums.txt', albums);
+      console.log("ALBUMS",albums);
+      fs.writeFileSync('albums.txt', albums.toString());
       return true;
    } catch (err) {
       console.log(err)
@@ -56,4 +68,13 @@ const writeToFile = (albums) => {
    }
 }
 
-module.exports = { getAlbumById, getResponse }
+const addAlbum = (name) => {
+   console.log("adding album ", name);
+   let albums = getAlbums();
+   albums.push(name);
+   const result = writeToFile(albums);
+   return { name: name };
+   
+} 
+
+module.exports = { getAlbumById, getResponse, addAlbum, upload }
