@@ -2,6 +2,7 @@ const { response } = require('express');
 var fs = require('fs');
 var _ = require("lodash");
 const multer = require('multer');
+const path = require('path');
 
 const fileStorageEngine = multer.diskStorage({
    destination: (req, file, cb) => {
@@ -68,13 +69,46 @@ const writeToFile = (albums) => {
    }
 }
 
+const createPathForAlbum  = (name) => {
+   try {
+      const pathName = path.join(`/home/jack/Documents/Projects/LocalPhotoApp/LocalPhotoApp/uploads/${name}`);
+      return fs.mkdirSync(pathName, {recursive: true});
+   } catch (err) {
+      console.log("Could not create path for album", err);
+   }
+}
+
 const addAlbum = (name) => {
    console.log("adding album ", name);
    let albums = getAlbums();
    albums.push(name);
    const result = writeToFile(albums);
+   createPathForAlbum(name);
    return { name: name };
    
 } 
 
-module.exports = { getAlbumById, getResponse, addAlbum, upload }
+const getPhotosForAlbum = (album) => {
+   const pathName = path.join(`/home/jack/Documents/Projects/LocalPhotoApp/LocalPhotoApp/uploads/${album}`);
+   //loop and get photos in folder, return urls?
+   const filenames = fs.readdirSync(pathName);
+   let photos = [];
+   let url, photo;
+   filenames.forEach(file => {
+      url = path.join(`/uploads/${album}/${file}`);
+      photo = {url: url};
+      photos.push(photo);
+   });
+   console.log("urls", photos);
+   return photos;
+}
+
+const getPhotos = (albums) => {
+   let photos;
+   albums.forEach((album) => {
+      photos = getPhotosForAlbum(album);
+   });
+   return photos;
+}
+
+module.exports = { getAlbumById, getResponse, addAlbum, getPhotosForAlbum, getPhotos }

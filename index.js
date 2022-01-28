@@ -15,22 +15,34 @@ const typeDefs = gql`
   # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
   scalar Upload
   # This "Book" type defines the queryable fields for every book in our data source.
+  
+  #input AlbumInput {
+  #  name: String
+  #}
+  
   type Album {
     name: String,
     photos: [Photo]
   }
-
+  
   type Photo {
-    url: String,
-    album: Album
+    url: String
   }
+
+
+  #input Albums {
+  #  albums: [AlbumInput]
+  #}
 
   # The "Query" type is special: it lists all of the available queries that
   # clients can execute, along with the return type for each. In this
   # case, the "books" query returns an array of zero or more Books (defined above).
   type Query {
-    albums: [Album]
+    allAlbums: [Album],
+    photosByAlbumName(names: [String]): [Photo]
+   # photos(albums: Albums): [Photo]
   }
+
 
   type Mutation {
       addAlbum(name: String): Album,
@@ -45,7 +57,13 @@ const resolvers = {
     Upload: GraphQLUpload,
 
     Query: {
-      albums: () => crud.getResponse(),
+      allAlbums: () => crud.getResponse(),
+      photosByAlbumName: (parent, { names }) => crud.getPhotos(names)
+      //photos: (parent, { album }) => crud.getPhotos(album),
+    },
+
+    Album: {
+      photos: (album) => crud.getPhotosForAlbum(album.name)
     },
 
     Mutation: {
@@ -55,7 +73,7 @@ const resolvers = {
         addPhoto: async (parent, { image, album }) => {
             console.log(image);
             const { filename, mimetype, encoding, createReadStream } = await image;
-            const pathName = path.join(__dirname, `/uploads/${album}/${filename}`)
+            const pathName = path.join(`/home/jack/Documents/Projects/LocalPhotoApp/LocalPhotoApp/uploads/${album}/${filename}`)
             console.log(album)
             const stream = createReadStream();
             const out = require('fs').createWriteStream(pathName);
