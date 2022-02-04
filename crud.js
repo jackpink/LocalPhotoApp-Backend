@@ -71,7 +71,8 @@ const writeToFile = (albums) => {
 
 const createPathForAlbum  = (name) => {
    try {
-      const pathName = path.join(`/home/jack/Documents/Projects/LocalPhotoApp/LocalPhotoApp/uploads/${name}`);
+      console.log(path.join(__dirname, '../'));
+      const pathName = path.join(__dirname, '../', `/LocalPhotoApp/public/uploads/${name}`);
       return fs.mkdirSync(pathName, {recursive: true});
    } catch (err) {
       console.log("Could not create path for album", err);
@@ -89,13 +90,13 @@ const addAlbum = (name) => {
 } 
 
 const getPhotosForAlbum = (album) => {
-   const pathName = path.join(`/home/jack/Documents/Projects/LocalPhotoApp/LocalPhotoApp/uploads/${album}`);
+   const pathName = path.join(__dirname, '../', `/LocalPhotoApp/public/uploads/${album}`);
    //loop and get photos in folder, return urls?
    const filenames = fs.readdirSync(pathName);
    let photos = [];
    let url, photo;
    filenames.forEach(file => {
-      url = path.join(`/uploads/${album}/${file}`);
+      url = path.join(`uploads/${album}/${file}`);
       photo = {url: url};
       photos.push(photo);
    });

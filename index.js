@@ -73,7 +73,7 @@ const resolvers = {
         addPhoto: async (parent, { image, album }) => {
             console.log(image);
             const { filename, mimetype, encoding, createReadStream } = await image;
-            const pathName = path.join(`/home/jack/Documents/Projects/LocalPhotoApp/LocalPhotoApp/uploads/${album}/${filename}`)
+            const pathName = path.join(`/home/jack/Documents/Projects/LocalPhotoApp/LocalPhotoApp/public/uploads/${album}/${filename}`)
             console.log(album)
             const stream = createReadStream();
             const out = require('fs').createWriteStream(pathName);
